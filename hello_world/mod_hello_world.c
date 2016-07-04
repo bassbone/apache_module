@@ -46,6 +46,7 @@ static int hello_world_handler(request_rec *r)
 {
     if (!strcmp(r->content_type, "text/html") && !r->header_only) {
         ap_rputs("hello world<br />\n", r);
+        ap_rputs("by J.I.<br />\n", r);
     }
 
     return DECLINED;
