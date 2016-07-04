@@ -37,6 +37,8 @@
 **    The sample page from mod_hello_world.c
 */ 
 
+#include <stdio.h>
+
 #include "httpd.h"
 #include "http_config.h"
 #include "http_protocol.h"
@@ -44,9 +46,15 @@
 
 static int hello_world_handler(request_rec *r)
 {
+    conn_rec *c;
+    char str[100];
+    char *str_ip;
+
     if (!strcmp(r->content_type, "text/html") && !r->header_only) {
-        ap_rputs("hello world<br />\n", r);
-        ap_rputs("by J.I.<br />\n", r);
+        c = r->connection;
+        str_ip = c->remote_ip;
+        sprintf(str, "Your IP Address is %s<br>\n", str_ip);
+        ap_rputs(str, r);
     }
 
     return DECLINED;
