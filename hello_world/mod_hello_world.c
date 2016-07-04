@@ -42,7 +42,6 @@
 #include "http_protocol.h"
 #include "ap_config.h"
 
-/* The sample content handler */
 static int hello_world_handler(request_rec *r)
 {
     if (!strcmp(r->content_type, "text/html") && !r->header_only) {
