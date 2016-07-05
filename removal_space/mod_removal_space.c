@@ -41,20 +41,28 @@
 #include "http_config.h"
 #include "http_protocol.h"
 #include "ap_config.h"
+#include "apr_strings.h"
+#include "apr_general.h"
+#include "util_filter.h"
+#include "apr_buckets.h"
+#include "http_request.h"
 
 /* The sample content handler */
-static int removal_space_handler(request_rec *r)
-{
-    if (!strcmp(r->content_type, "text/html") && !r->header_only) {
-    
-    }
+static apr_status_t removal_space_out_filter(ap_filter_t *f, apr_bucket_brigade *in_bb) {
 
-    return DECLINED;
+    const request_rec* const r = f->r;
+
+    if (APR_BRIGADE_EMPTY(in_bb))
+        return APR_SUCCESS;
+
+    ap_remove_output_filter(f);
+
+    return ap_pass_brigade(f->next, in_bb);
 }
 
 static void removal_space_register_hooks(apr_pool_t *p)
 {
-    ap_hook_handler(removal_space_handler, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_register_output_filter("removal_space", removal_space_out_filter, NULL, AP_FTYPE_RESOURCE);
 }
 
 /* Dispatch list for API hooks */
