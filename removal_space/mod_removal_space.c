@@ -47,13 +47,24 @@
 #include "apr_buckets.h"
 #include "http_request.h"
 
-/* The sample content handler */
+#define PUT(f, bb, s) APR_BRIGADE_INSERT_TAIL(bb, apr_bucket_immortal_create(s, strlen(s), f->c->bucket_alloc))
+
 static apr_status_t removal_space_out_filter(ap_filter_t *f, apr_bucket_brigade *in_bb) {
 
-    const request_rec* const r = f->r;
+    apr_status_t err;
+    apr_size_t buf_len = 0;
+    unsigned char* ptr;
+    unsigned char* buf = 0;
 
-    if (APR_BRIGADE_EMPTY(in_bb))
-        return APR_SUCCESS;
+    err = apr_brigade_pflatten(in_bb, (char**)&buf, &buf_len, f->r->pool);
+    if (err) return err;
+    apr_brigade_cleanup(in_bb);
+
+    PUT(f, in_bb, "test");
+
+    //PUT(f, in_bb, ptr);
+
+    APR_BRIGADE_INSERT_TAIL(in_bb, apr_bucket_eos_create(f->c->bucket_alloc));
 
     ap_remove_output_filter(f);
 
