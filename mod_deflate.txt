@@ -1,0 +1,47 @@
+rootにスイッチ
+
+cd /usr/tmp
+wget http://ftp.kddilabs.jp/infosystems/apache//httpd/httpd-2.2.31.tar.gz
+tar zxvf httpd-2.2.31.tar.gz
+cd /usr/tmp/httpd-2.2.31/modules/filters
+apxs -i -c mod_deflate.c
+ls -l /usr/local/apache2/modules/
+cd /usr/local/apache2/conf
+cp -p httpd.conf httpd.conf.20160706
+vim httpd.conf
+
+以下の内容を追記する。
+======================================================================
+LoadModule deflate_module     modules/mod_deflate.so
+
+<IfModule mod_deflate.c>
+     SetOutputFilter DEFLATE
+
+     DeflateCompressionLevel 1
+
+     # Mozilla4系などの古いブラウザで無効、しかしMSIEは除外
+     BrowserMatch ^Mozilla/4\.0[678] no-gzip
+     BrowserMatch ^Mozilla/4 gzip-only-text/html
+     BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+
+     # gifやjpgなど圧縮済みのコンテンツは再圧縮しない
+     SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|ico)$ no-gzip dont-vary
+     SetEnvIfNoCase Request_URI _\.utxt$ no-gzip
+
+     # htmlやcssなどは圧縮
+     AddOutputFilterByType DEFLATE text/plain
+     AddOutputFilterByType DEFLATE text/html
+     AddOutputFilterByType DEFLATE text/xml
+     AddOutputFilterByType DEFLATE text/css
+     AddOutputFilterByType DEFLATE application/xhtml+xml
+     AddOutputFilterByType DEFLATE application/xml
+     AddOutputFilterByType DEFLATE application/rss+xml
+     AddOutputFilterByType DEFLATE application/atom_xml
+     AddOutputFilterByType DEFLATE application/x-javascript
+     AddOutputFilterByType DEFLATE application/x-httpd-php
+</IfModule>
+======================================================================
+
+diff httpd.conf httpd.conf.20160706
+apachectl configtest
+apachectl restart
